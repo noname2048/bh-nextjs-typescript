@@ -10,7 +10,7 @@ export default function Layout({
   home?: boolean;
 }) {
   return (
-    <div className="container">
+    <div>
       <Head>
         <link rel="icon" href="/favicon.ico" />
         <meta name="description" content="서지정보검색" />
