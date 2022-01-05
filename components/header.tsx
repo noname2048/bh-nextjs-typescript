@@ -3,9 +3,9 @@ import { BiSearch } from "react-icons/bi";
 
 export default function Header() {
   return (
-    <header className="flex flex-row justify-between">
-      <h1 className="basis-1/4">BookCollecter</h1>
-      <nav className="basis-1/2">
+    <header className="flex flex-row justify-between items-end h-14 m-5">
+      <h1 className="basis-1/4 self-start bg-sky-400">BookCollecter</h1>
+      <nav className="basis-1/2 flex justify-around bg-green-400">
         <Link href="/index">
           <a>Home</a>
         </Link>
@@ -16,7 +16,7 @@ export default function Header() {
           <a>Recent Requests</a>
         </Link>
       </nav>
-      <div className="basis-1/4 flex flex-row">
+      <div className="basis-1/4 self-start flex flex-row bg-gray-400">
         <input type="text" />
         <BiSearch />
       </div>
