@@ -21,8 +21,8 @@ const Banner: NextPage = () => {
           className="flex flex-col border-2 p-20"
           onSubmit={(event) => {
             event.preventDefault();
-            console.log(event.target?.title.value);
-            const isbn13 = event.target?.title.value || "";
+            console.log(event.target?.isbn13.value);
+            const isbn13 = event.target?.isbn13.value || "";
             router.push(`/search?isbn13=${isbn13}`);
           }}
         >
@@ -31,7 +31,7 @@ const Banner: NextPage = () => {
             <BiSearch className="text-2xl text-center" />
             <input
               className="h-10 w-full text-2xl text-center focus:border-transparent focus:outline-none"
-              name="title"
+              name="isbn13"
               type="text"
               onChange={(e) => {
                 setTitle(e.target.value);
