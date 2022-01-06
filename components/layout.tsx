@@ -18,7 +18,7 @@ export default function Layout({
         <meta name="og:title" content="website" />
       </Head>
       <Header></Header>
-      <main>{children}</main>
+      <main className="m-5">{children}</main>
       <footer></footer>
     </div>
   );

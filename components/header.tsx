@@ -8,7 +8,6 @@ import { useRouter } from "next/router";
 
 export default function Header() {
   const router = useRouter();
-  console.log(router);
   return (
     <header className="grid gap-4 grid-cols-3 grid-rows-1 justify-between items-center h-14 m-5 border-4 border-slate-700">
       <div className="border-3 border-slate-700 flex justify-start">
@@ -16,15 +15,15 @@ export default function Header() {
       </div>
       <nav className="flex self-end justify-around items-end">
         <Link href="/">
-          <a className={router.asPath === "/" ? "underline" : ""}>Home</a>
+          <a className={router.pathname === "/" ? "underline" : ""}>Home</a>
         </Link>
         <Link href="/search">
-          <a className={router.asPath === "/search" ? "underline" : ""}>
+          <a className={router.pathname === "/search" ? "underline" : ""}>
             Detail Search
           </a>
         </Link>
         <Link href="/requests">
-          <a className={router.asPath === "/requests" ? "underline" : ""}>
+          <a className={router.pathname === "/requests" ? "underline" : ""}>
             Recent Requests
           </a>
         </Link>
