@@ -39,11 +39,11 @@ const RequestList: NextPage = () => {
   return (
     <div>
       {serverError
-        ? "서버에 오류가 있습니다."
+        ? "벡엔드로부터 문제가 발생했습니다"
         : result.length === 0
         ? "검색결과가 없습니다"
         : result.map((item: Object, idx: number) => (
-            <div key={idx}>{item}</div>
+            <div key={idx}>{item.isbn13}</div>
           ))}
     </div>
   );
