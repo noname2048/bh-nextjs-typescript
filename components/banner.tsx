@@ -2,6 +2,7 @@ import { NextPage } from "next";
 import { BiSearch } from "react-icons/bi";
 import { useRouter } from "next/router";
 import { useState } from "react";
+import Link from "next/link";
 
 const Banner: NextPage = () => {
   const router = useRouter();
@@ -12,13 +13,13 @@ const Banner: NextPage = () => {
       <div className="text-5xl m-10">
         사용자의 검색데이터를 통해
         <br />
-        책을 모으는 DB 콜렉터 서비스
+        책을 모으는 콜렉터 서비스
         <br />
         BookCollecter 입니다
       </div>
       <div className="flex flex-row justify-around m-10">
         <form
-          className="flex flex-col border-2 p-20"
+          className="flex flex-col border-2 p-20 hover:border-black"
           onSubmit={(event) => {
             event.preventDefault();
             console.log(event.target?.isbn13.value);
@@ -38,6 +39,13 @@ const Banner: NextPage = () => {
               }}
             />
           </div>
+          <Link href={`search?isbn13=9791188102051`} passHref>
+            <div className="flex flex-row justify-center items-center">
+              <div className="grow-0 border-2 px-2 py-1 rounded-md bg-slate-200 hover:bg-slate-100">
+                <span>979-11-88102-05-1</span> 으로 검색해보기
+              </div>
+            </div>
+          </Link>
         </form>
         <form
           className="flex flex-col border-2 p-20"
