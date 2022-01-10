@@ -1,88 +1,115 @@
 import { useEffect, useState, useMemo } from "react";
 import useSWR from "swr";
 
+function handleOnClick() {
+  (async () => {
+    const res = await fetch(`http://localhost:8000/api/v1/books/requests`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify([{ isbn13: 9791188102051 }]),
+    });
+    const data = await res.json();
+    console.log(data);
+  })();
+}
+
 export default function Update({ isbn13 }: { isbn13: number }) {
-  const [level, setLevel] = useState(0);
-  const [objId, setObjId] = useState("");
-  const isIsbnValid = useMemo(
-    () => isbn13 >= 10 ** 13 && isbn13 < 10 ** 14,
+  /**
+   * 레벨이 대한 설명
+   * -1 유효하지 않음
+   * 0 초기상태
+   * 1 리퀘스트가 없어서 보냈음
+   * 2 리퀘스트가 있어서 대기중
+   * 3 준비가 완료됨
+   */
+  const [level, setLevel] = useState<number>(0);
+  const [msgArray, setMsgArray] = useState<string[]>([]);
+  const [objId, setObjId] = useState<string>("");
+  const isIsbnValid: boolean = useMemo(
+    () => isbn13 >= 10 ** 12 && isbn13 < 10 ** 13,
     [isbn13]
   );
 
   useEffect(() => {
+    console.log({ level, msgArray, objId });
+
     (async () => {
       try {
-        if (level === 0 && isIsbnValid) {
-          const res = await fetch(
-            `http://localhost:8000/api/v1/books/requests?isbn13=${isbn13}`
-          );
-          const data = await res.json();
-          if (data.length > 0) {
-            setObjId(data[0].id);
-            if (data.result_code === 200) {
-              setLevel(2);
-            } else {
-              setLevel(3);
-            }
-          } else {
-            setLevel(1);
+        if (isIsbnValid === false) {
+          setLevel(-1);
+          setMsgArray((msgs) => ["유효한 isbn13 값이 아닙니다"]);
+        } else {
+          switch (level) {
+            case 0:
+              console.log(0);
+              const data = await (
+                await fetch(
+                  `http://localhost:8000/api/v1/books/requests?isbn13=${isbn13}`
+                )
+              ).json();
+              if (data.length === 0) {
+                const data: Object[] = await (
+                  await fetch(`http://localhost:8000/api/v1/books/requests`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ isbn13 }),
+                  })
+                ).json();
+                if (data.length > 0) {
+                  setMsgArray((msgs) => [...msgs, "리퀘스트를 보냈습니다."]);
+                  setLevel(1);
+                } else {
+                  setMsgArray((msgs) => [
+                    ...msgs,
+                    "리퀘스트를 정상적으로 보내지 못했습니다.",
+                  ]);
+                  setLevel(5);
+                }
+              } else {
+                console.log("num");
+                setObjId(data[0].id);
+                if (data.result_code === 201) {
+                  setMsgArray((msgs) => [...msgs, "준비가 완료되었습니다!"]);
+                  setLevel(3);
+                } else if (data.result_code === 200) {
+                  setMsgArray((msgs) => [
+                    ...msgs,
+                    "리퀘스트가 있어서 대기중입니다.",
+                  ]);
+                  setLevel(2);
+                } else {
+                  console.log(data);
+                  setMsgArray((msgs) => [
+                    ...msgs,
+                    "리퀘스트 처리에 문제가 있음을 확인했습니다. 관리자에게 연락하세요.",
+                  ]);
+                  setLevel(5);
+                }
+              }
+              break;
+            case 1:
+            case 2:
+              // 주기적인 폴링 함수 등록
+              break;
           }
         }
       } catch (err) {
         console.log(err);
       }
     })();
-  }, [isbn13, level, isIsbnValid]);
 
-  useEffect(() => {
-    (async () => {
-      try {
-        if (level === 1) {
-          const res = await fetch(
-            `http://localhost:8000/api/v1/books/requests`,
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ isbn13 }),
-            }
-          );
-          const data = await res.json();
-          setObjId(data[0].id);
-          setLevel(2);
-        }
-      } catch (err) {
-        console.log(err);
-      }
-    })();
-  }, [isbn13, level]);
+    console.log("end", { level, msgArray, objId });
+  }, [isbn13, level, objId, isIsbnValid, msgArray]);
 
-  useEffect(() => {
-    (async () => {
-      try {
-        if (level === 2) {
-          const res = await fetch(
-            `http://localhost:8000/api/v1/books/requests/${objId}`
-          );
-          const data = await res.json();
-          if (data) {
-            if (data.result_code !== 201) {
-              setLevel(3);
-            }
-          } else {
-            console.log("something wrong");
-          }
-        }
-      } catch (err) {
-        console.log(err);
-      }
-    })();
-  });
   return (
     <>
-      {isIsbnValid ? <div>올바른 ISBN 입니다. </div> : null}
-      {level >= 1 ? <div>리퀘스트가 있는지 확인합니다.</div> : null}
-      {level >= 2 ? <div>크롤링을 준비합니다.</div> : null}
-      {level >= 3 ? <div>성공적으로 업데이트 되었습니다.</div> : null}
+      {isIsbnValid ? msgArray.map((s, idx) => <div key={idx}>{s}</div>) : null}
+      <button
+        className="border-2 p-2 bg-slate-400 rounded-md"
+        onClick={handleOnClick}
+      >
+        humm
+      </button>
     </>
   );
 }
