@@ -19,7 +19,7 @@ const Banner: NextPage = () => {
       </div>
       <div className="flex flex-row justify-around m-10">
         <form
-          className="flex flex-col border-2 p-20 hover:border-black"
+          className="flex flex-col border-2 p-20 hover:border-gray-600 focus-within:border-black"
           onSubmit={(event) => {
             event.preventDefault();
             console.log(event.target?.isbn13.value);
@@ -28,7 +28,7 @@ const Banner: NextPage = () => {
           }}
         >
           <span className="text-5xl text-center">ISBN13으로 검색하기</span>
-          <div className="flex flex-row justify-center items-center gap-1 my-2 border-2 rounded px-2 focus-within:border-sky-400 ">
+          <div className="flex flex-row justify-center items-center gap-1 my-2 border-2 rounded px-2 focus-within:border-sky-400">
             <BiSearch className="text-2xl text-center" />
             <input
               className="h-10 w-full text-2xl text-center focus:border-transparent focus:outline-none"
@@ -48,7 +48,7 @@ const Banner: NextPage = () => {
           </Link>
         </form>
         <form
-          className="flex flex-col border-2 p-20"
+          className="flex flex-col border-2 p-20 hover:border-gray-600 focus-within:border-black"
           action="/search"
           method="GET"
           onSubmit={(e) => {
