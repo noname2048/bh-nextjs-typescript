@@ -29,77 +29,140 @@ export default function Update({ isbn13 }: { isbn13: number }) {
     () => isbn13 >= 10 ** 12 && isbn13 < 10 ** 13,
     [isbn13]
   );
-
+  //new useEffect
   useEffect(() => {
-    console.log({ level, msgArray, objId });
-
     (async () => {
+      let keepGo = true;
       try {
-        if (isIsbnValid === false) {
-          setLevel(-1);
-          setMsgArray((msgs) => ["유효한 isbn13 값이 아닙니다"]);
-        } else {
-          switch (level) {
-            case 0:
-              console.log(0);
-              const data = await (
-                await fetch(
-                  `http://localhost:8000/api/v1/books/requests?isbn13=${isbn13}`
-                )
-              ).json();
-              if (data.length === 0) {
-                const data: Object[] = await (
-                  await fetch(`http://localhost:8000/api/v1/books/requests`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ isbn13 }),
-                  })
-                ).json();
-                if (data.length > 0) {
-                  setMsgArray((msgs) => [...msgs, "리퀘스트를 보냈습니다."]);
-                  setLevel(1);
-                } else {
-                  setMsgArray((msgs) => [
-                    ...msgs,
-                    "리퀘스트를 정상적으로 보내지 못했습니다.",
-                  ]);
-                  setLevel(5);
-                }
-              } else {
-                console.log("num");
-                setObjId(data[0].id);
-                if (data.result_code === 201) {
-                  setMsgArray((msgs) => [...msgs, "준비가 완료되었습니다!"]);
-                  setLevel(3);
-                } else if (data.result_code === 200) {
-                  setMsgArray((msgs) => [
-                    ...msgs,
-                    "리퀘스트가 있어서 대기중입니다.",
-                  ]);
-                  setLevel(2);
-                } else {
-                  console.log(data);
-                  setMsgArray((msgs) => [
-                    ...msgs,
-                    "리퀘스트 처리에 문제가 있음을 확인했습니다. 관리자에게 연락하세요.",
-                  ]);
-                  setLevel(5);
-                }
-              }
-              break;
-            case 1:
-            case 2:
-              // 주기적인 폴링 함수 등록
-              break;
+        const data: Object[] = await (
+          await fetch(
+            `http://localhost:8000/api/v1/books/requests?isbn13=${isbn13}`
+          )
+        ).json();
+        if (data.length === 0) {
+          setMsgArray((prev) => [
+            ...prev,
+            "해당 리퀘스트가 존재하지 않습니다.",
+          ]);
+          const res = await fetch(
+            `http://localhost:8000/api/v1/books/requests`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify([{ isbn13 }]),
+            }
+          );
+          const data: Object[] = await res.json();
+          if (res.status === 201) {
+            setMsgArray((prev) => [
+              ...prev,
+              "해당 리퀘스트를 자동으로 작성하였습니다.",
+            ]);
+          } else {
+            keepGo = false;
+            setMsgArray((prev) => [
+              ...prev,
+              "해당 리퀘스트를 자동으로 작성하는데에 오류가 발생하였습니다.",
+            ]);
           }
         }
+
+        setMsgArray((prev) => [
+          ...prev,
+          "자동으로 결과 반영을 확인중입니다...",
+        ]);
+
+        // var id = setInterval(async () => {
+        //   if (keepGo) {
+        //     const res = await fetch(
+        //       `http://localhost:8000/api/v1/books/requests?isbn13=${isbn13}`
+        //     );
+        //     const data = await res.json();
+        //     if (data.length > 0 && data.result_code === 201) {
+        //       setMsgArray((prev) => [...prev, "크롤링 완료!"]);
+        //       clearInterval(id);
+        //     }
+        //   }
+        // }, 3000);
+        // return () => clearInterval(id);
       } catch (err) {
+        keepGo = false;
+        setMsgArray((prev) => [...prev, "백그라운드에 문제가 발생했습니다."]);
         console.log(err);
       }
     })();
+  }, [isbn13]);
 
-    console.log("end", { level, msgArray, objId });
-  }, [isbn13, level, objId, isIsbnValid, msgArray]);
+  // useEffect(() => {
+  //   console.log({ level, msgArray, objId });
+
+  //   (async () => {
+  //     try {
+  //       if (isIsbnValid === false) {
+  //         setLevel(-1);
+  //         setMsgArray((msgs) => ["유효한 isbn13 값이 아닙니다"]);
+  //       } else {
+  //         switch (level) {
+  //           case 0:
+  //             console.log(0);
+  //             const data = await (
+  //               await fetch(
+  //                 `http://localhost:8000/api/v1/books/requests?isbn13=${isbn13}`
+  //               )
+  //             ).json();
+  //             if (data.length === 0) {
+  //               const data: Object[] = await (
+  //                 await fetch(`http://localhost:8000/api/v1/books/requests`, {
+  //                   method: "POST",
+  //                   headers: { "Content-Type": "application/json" },
+  //                   body: JSON.stringify({ isbn13 }),
+  //                 })
+  //               ).json();
+  //               if (data.length > 0) {
+  //                 setMsgArray((msgs) => [...msgs, "리퀘스트를 보냈습니다."]);
+  //                 setLevel(1);
+  //               } else {
+  //                 setMsgArray((msgs) => [
+  //                   ...msgs,
+  //                   "리퀘스트를 정상적으로 보내지 못했습니다.",
+  //                 ]);
+  //                 setLevel(5);
+  //               }
+  //             } else {
+  //               console.log("num");
+  //               setObjId(data[0].id);
+  //               if (data.result_code === 201) {
+  //                 setMsgArray((msgs) => [...msgs, "준비가 완료되었습니다!"]);
+  //                 setLevel(3);
+  //               } else if (data.result_code === 200) {
+  //                 setMsgArray((msgs) => [
+  //                   ...msgs,
+  //                   "리퀘스트가 있어서 대기중입니다.",
+  //                 ]);
+  //                 setLevel(2);
+  //               } else {
+  //                 console.log(data);
+  //                 setMsgArray((msgs) => [
+  //                   ...msgs,
+  //                   "리퀘스트 처리에 문제가 있음을 확인했습니다. 관리자에게 연락하세요.",
+  //                 ]);
+  //                 setLevel(5);
+  //               }
+  //             }
+  //             break;
+  //           case 1:
+  //           case 2:
+  //             // 주기적인 폴링 함수 등록
+  //             break;
+  //         }
+  //       }
+  //     } catch (err) {
+  //       console.log(err);
+  //     }
+  //   })();
+
+  //   console.log("end", { level, msgArray, objId });
+  // }, [isbn13, level, objId, isIsbnValid, msgArray]);
 
   return (
     <>
