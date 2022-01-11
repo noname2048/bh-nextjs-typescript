@@ -1,6 +1,5 @@
 import type { NextPage } from "next/types";
 import { useState, useEffect } from "react";
-import NoResultAskAndSendRequestIsbn from "../components/noResultAskAndSendRequestIsbn";
 import AutoUpdate from "../components/autoUpdate";
 import { useRouter } from "next/router";
 
