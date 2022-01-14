@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import useSWR from "swr";
 
 function handleOnClick() {
@@ -72,19 +72,20 @@ export default function Update({ isbn13 }: { isbn13: number }) {
           "자동으로 결과 반영을 확인중입니다...",
         ]);
 
-        // var id = setInterval(async () => {
-        //   if (keepGo) {
-        //     const res = await fetch(
-        //       `http://localhost:8000/api/v1/books/requests?isbn13=${isbn13}`
-        //     );
-        //     const data = await res.json();
-        //     if (data.length > 0 && data.result_code === 201) {
-        //       setMsgArray((prev) => [...prev, "크롤링 완료!"]);
-        //       clearInterval(id);
-        //     }
-        //   }
-        // }, 3000);
-        // return () => clearInterval(id);
+        const loop = setInterval(async () => {
+          if (keepGo) {
+            console.log("fetch!");
+            const res = await fetch(
+              `http://localhost:8000/api/v1/books/requests?isbn13=${isbn13}`
+            );
+            const data = await res.json();
+            if (data.length > 0 && data.result_code === 201) {
+              setMsgArray((prev) => [...prev, "크롤링 완료!"]);
+              clearInterval(loop);
+            }
+          }
+        }, 3000);
+        return () => clearInterval(loop);
       } catch (err) {
         keepGo = false;
         setMsgArray((prev) => [...prev, "백그라운드에 문제가 발생했습니다."]);
