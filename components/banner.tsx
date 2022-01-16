@@ -53,7 +53,7 @@ const Banner: NextPage = () => {
               <div>{errorMsg}</div>
             </div>
           )}
-          <Link href={`search?isbn13=9791188102051`} passHref>
+          <Link href={`/search?isbn13=9791188102051`} passHref>
             <div className="justify-self-end flex flex-row justify-center items-center">
               <div className="grow-0 border-2 px-2 py-1 rounded-md bg-slate-200 hover:bg-slate-100">
                 <span>979-11-88102-05-1</span> 으로 검색해보기
