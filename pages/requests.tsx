@@ -1,6 +1,7 @@
 import { NextPage } from "next";
 import { useState, useEffect } from "react";
 import useSWR from "swr";
+import RequestListComp from "../components/requestList";
 
 const requestUrl = "http://localhost:8000/api/v1/books/requests";
 
@@ -38,13 +39,13 @@ const RequestList: NextPage = () => {
 
   return (
     <div>
-      {serverError
-        ? "벡엔드로부터 문제가 발생했습니다"
-        : result.length === 0
-        ? "검색결과가 없습니다"
-        : result.map((item: Object, idx: number) => (
-            <div key={idx}>{item.isbn13}</div>
-          ))}
+      {serverError ? (
+        "벡엔드로부터 문제가 발생했습니다"
+      ) : result.length === 0 ? (
+        "검색결과가 없습니다"
+      ) : (
+        <RequestListComp requestList={result} />
+      )}
     </div>
   );
 };
