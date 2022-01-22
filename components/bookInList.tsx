@@ -10,16 +10,14 @@ export default function bookInList({
   key: number | undefined;
 }): React.ReactElement {
   return (
-    <ul className="rounded overflow-hidden">
+    <ul className="rounded overflow-hidden w-full h-10">
       <Image
         src={`https://job-book-image.s3.ap-northeast-2.amazonaws.com/${item.cover}`}
         alt={`book image for isbn ${item.isbn13}`}
-        width={100}
-        height={100}
+        layout="intrinsic"
       />
       <li>{item.cover}</li>
       <li>{item.created_at}</li>
-      <li></li>
     </ul>
   );
 }
