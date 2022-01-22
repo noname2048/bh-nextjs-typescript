@@ -1,53 +1,72 @@
 import { NextPage } from "next";
+import { responseSymbol } from "next/dist/server/web/spec-compliant/fetch-event";
 import { useState, useEffect } from "react";
 import useSWR from "swr";
 import RequestListComp from "../components/requestList";
+import RequestModel from "../interfaces/requestModel";
 
-const requestUrl = "http://localhost:8000/api/v1/books/requests";
+const fetcher = (...args): Promise<JSON> =>
+  fetch(...args).then((response) => response.json());
 
-const RequestList: NextPage = () => {
-  const [result, setResult] = useState([]);
-  const [serverError, setServerError] = useState(false);
+async function typeFetcher<T>(request: RequestInfo): Promise<T> {
+  const response = await fetch(request);
+  return await response.json();
+}
 
-  // const { data, error } = useSWR(
-  //   "http://localhost:8000/api/v1/books/requests",
-  //   fetch
-  // );
+const unknownrFetcher = async <T extends unknown>(
+  request: RequestInfo
+): Promise<T> => {
+  const response = await fetch(request);
+  return await response.json();
+};
 
-  // if (error) return <div>에러가 발생했습니다</div>;
-  // setResult(data);
+const swrFetcher = async (request: RequestInfo): Promise<JSON> => {
+  const response = await fetch(request);
+  return await response.json();
+};
 
-  // const fd = async (event) => {
-  //   event.preventDefault();
-  // }
+function useRequest() {
+  const { data, error } = useSWR(
+    `http://localhost:8000/api/v1/books/requests`,
+    swrFetcher
+  );
 
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const jsonData = await (await fetch(requestUrl)).json();
-        console.log(jsonData);
-        setResult(jsonData);
-        console.log(jsonData);
-        setServerError(false);
-      } catch (err) {
-        setResult([]);
-        setServerError(true);
-      }
-    }
-    fetchData();
-  }, []);
+  return {
+    requests: data,
+    isLoading: !error && !data,
+    isError: error,
+  };
+}
 
+const RequestsPage: NextPage = () => {
+  const { requests, isLoading, isError } = useRequest();
+  if (isLoading) return <div>로딩중입니다.</div>;
+  if (isError) return <div>벡엔드로부터 문제가 발생했습니다</div>;
+  const requestList = requests as unknown as RequestModel[];
   return (
-    <div>
-      {serverError ? (
-        "벡엔드로부터 문제가 발생했습니다"
-      ) : result.length === 0 ? (
-        "검색결과가 없습니다"
-      ) : (
-        <RequestListComp requestList={result} />
-      )}
-    </div>
+    <>
+      {requestList.map((item, idx) => (
+        <RequestItem item={item} key={idx} />
+      ))}
+    </>
   );
 };
 
-export default RequestList;
+function RequestItem({
+  item,
+  key,
+}: {
+  item: RequestModel;
+  key: number;
+}): React.ReactElement {
+  return (
+    <div className="flex flex-row gap-4">
+      <span>isbn13</span>
+      <span>{item.isbn13}</span>
+      <span>date</span>
+      <span>{item.created_at}</span>
+    </div>
+  );
+}
+
+export default RequestsPage;
