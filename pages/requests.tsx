@@ -4,6 +4,14 @@ import { useState, useEffect } from "react";
 import useSWR from "swr";
 import RequestListComp from "../components/requestList";
 import RequestModel from "../interfaces/requestModel";
+import styled from "styled-components";
+
+const TempComp = styled.div`
+  tr,
+  th {
+    padding: 15px;
+  }
+`;
 
 const fetcher = (...args): Promise<JSON> =>
   fetch(...args).then((response) => response.json());
@@ -21,6 +29,7 @@ const unknownrFetcher = async <T extends unknown>(
 };
 
 const swrFetcher = async (request: RequestInfo): Promise<JSON> => {
+  console.log("fetch one!");
   const response = await fetch(request);
   return await response.json();
 };
@@ -45,28 +54,72 @@ const RequestsPage: NextPage = () => {
   const requestList = requests as unknown as RequestModel[];
   return (
     <>
-      {requestList.map((item, idx) => (
-        <RequestItem item={item} key={idx} />
-      ))}
+      <table className="w-full border-2">
+        <thead className="border-2">
+          <tr className="border-2">
+            <th className="border-2" colSpan={2}>
+              request
+            </th>
+            <th className="border-2" colSpan={2}>
+              response
+            </th>
+            <th className="border-2">book</th>
+          </tr>
+          <tr>
+            <th>isbn13</th>
+            <th>date</th>
+            <th>success?</th>
+            <th>date</th>
+            <th>title</th>
+          </tr>
+        </thead>
+        <tbody>
+          {requestList.map((item, idx) => (
+            <RequestItem item={item} key={idx} />
+          ))}
+        </tbody>
+      </table>
     </>
   );
 };
 
-function RequestItem({
-  item,
-  key,
-}: {
-  item: RequestModel;
-  key: number;
-}): React.ReactElement {
+const er = "text-center py-3 border-2 w-24";
+
+function RequestItem({ item }: { item: RequestModel }): React.ReactElement {
   return (
-    <div className="flex flex-row gap-4">
-      <span>isbn13</span>
-      <span>{item.isbn13}</span>
-      <span>date</span>
-      <span>{item.created_at}</span>
-    </div>
+    <tr>
+      <td className={er}>{item.isbn13}</td>
+      <td className={er}>{item.created_at}</td>
+      <td className={er}></td>
+      <td className={er}></td>
+      <td className={er}></td>
+    </tr>
   );
 }
 
 export default RequestsPage;
+
+const responseFetcher = async <T extends unknown>(
+  request: RequestInfo
+): Promise<T> => {
+  const response = await fetch(request);
+  return await response.json();
+};
+
+function useResponse(isbns: Array<JSON>) {
+  const request: RequestInfo = new Request(
+    `http://localhost:8000/api/v1/books/responses`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(isbns),
+    }
+  );
+  const { data, error } = useSWR(request, responseFetcher);
+
+  return {
+    requests: data,
+    isLoading: !error && !data,
+    isError: error,
+  };
+}
