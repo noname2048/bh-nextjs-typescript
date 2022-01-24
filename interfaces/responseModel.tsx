@@ -5,4 +5,5 @@ export default interface ResponseModel {
 
   success: boolean | undefined;
   detail: any;
+  id: string;
 }
