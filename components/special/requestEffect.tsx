@@ -32,9 +32,24 @@ export default function RequestEffect(): React.ReactElement {
             .join("&");
           try {
             const json = await (await fetch(`/api/books/requsets`)).json();
-            // setRequests({ data: json, isLoading: null, error: null });
+            requests.data.forEach((element: RequestModel) => {
+              json.forEacth((updated: RequestModel) => {
+                if (
+                  element.id === updated.id &&
+                  !element.response_id &&
+                  updated.id
+                ) {
+                  element.response_id = updated.id;
+                }
+              });
+            });
+            setRequests({
+              data: requests,
+              isLoading: null,
+              error: null,
+            });
           } catch (err) {
-            // setRequests({ data: null, isLoading: null, error: err });
+            setRequests({ data: null, isLoading: null, error: err });
           }
         }
       }

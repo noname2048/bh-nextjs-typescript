@@ -6,6 +6,7 @@ import RequestListComp from "../components/requestList";
 import RequestModel from "../interfaces/requestModel";
 import ResponseModel from "../interfaces/responseModel";
 import styled from "styled-components";
+import RequestEffect from "../components/special/requestEffect";
 
 // const TempComp = styled.div`
 //   tr,
@@ -72,54 +73,55 @@ function useJson(request: any) {
 // };
 
 const RequestsPage: NextPage = () => {
-  const {
-    data: requestData,
-    loading: requestLoading,
-    error: requestError,
-  } = useJson(`/api/books/requests`);
+  // const {
+  //   data: requestData,
+  //   loading: requestLoading,
+  //   error: requestError,
+  // } = useJson(`/api/books/requests`);
 
-  const {
-    data: responseData,
-    loading: responseLoading,
-    error: responseError,
-  } = useJson(requestData ? `/api/books/responses` : null);
+  // const {
+  //   data: responseData,
+  //   loading: responseLoading,
+  //   error: responseError,
+  // } = useJson(requestData ? `/api/books/responses` : null);
 
-  if (requestLoading && responseLoading) return <div>로딩중입니다.</div>;
-  if (requestError || responseError)
-    return <div>벡엔드로부터 문제가 발생했습니다</div>;
-  const requestList = requests as unknown as RequestModel[];
-  const responseList = responseData as unknown as ResponseModel[];
+  // if (requestLoading && responseLoading) return <div>로딩중입니다.</div>;
+  // if (requestError || responseError)
+  //   return <div>벡엔드로부터 문제가 발생했습니다</div>;
+  // const requestList = requests as unknown as RequestModel[];
+  // const responseList = responseData as unknown as ResponseModel[];
 
   return (
-    <>
-      <table className="w-full border-2">
-        <thead className="border-2">
-          <tr className="border-2">
-            <th className="border-2" colSpan={2}>
-              request
-            </th>
-            <th className="border-2" colSpan={2}>
-              response
-            </th>
-            <th className="border-2">book</th>
-          </tr>
-          <tr>
-            <th>isbn13</th>
-            <th>date</th>
-            <th>success?</th>
-            <th>date</th>
-            <th>title</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            {requestList.map((item, idx) => (
-              <RequestItem item={item} key={idx} />
-            ))}
-          </tr>
-        </tbody>
-      </table>
-    </>
+    <RequestEffect />
+    // <>
+    //   <table className="w-full border-2">
+    //     <thead className="border-2">
+    //       <tr className="border-2">
+    //         <th className="border-2" colSpan={2}>
+    //           request
+    //         </th>
+    //         <th className="border-2" colSpan={2}>
+    //           response
+    //         </th>
+    //         <th className="border-2">book</th>
+    //       </tr>
+    //       <tr>
+    //         <th>isbn13</th>
+    //         <th>date</th>
+    //         <th>success?</th>
+    //         <th>date</th>
+    //         <th>title</th>
+    //       </tr>
+    //     </thead>
+    //     <tbody>
+    //       <tr>
+    //         {requestList.map((item, idx) => (
+    //           <RequestItem item={item} key={idx} />
+    //         ))}
+    //       </tr>
+    //     </tbody>
+    //   </table>
+    // </>
   );
 };
 
