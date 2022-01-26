@@ -10,6 +10,8 @@ import ResponseModel from "../../interfaces/responseModel";
  * 4. response_id가 모두 등록될때까지 3번과정을 진행하여 업데이트한다.
  */
 export default function RequestEffect(): React.ReactElement {
+  const updatedRequestData = useRef<any>();
+
   const [requests, setRequests] = useState<any>({
     data: null,
     error: null,
@@ -22,8 +24,10 @@ export default function RequestEffect(): React.ReactElement {
           await fetch(`http://localhost:8000/api/v1/books/requests`)
         ).json();
         setRequests({ data: json, error: null });
+        updatedRequestData.current = { data: json, error: null }; // ADD
       } catch (err) {
         setRequests({ data: null, error: err });
+        updatedRequestData.current = { data: null, error: err }; // ADD
       }
     })();
 
@@ -32,7 +36,10 @@ export default function RequestEffect(): React.ReactElement {
       if (requests?.error) {
         clearInterval(intervalId);
       } else if (requests?.data) {
-        const refresh = requests.data.filter(
+        // const refresh = requests.data.filter(
+        //   (item: RequestModel) => !item.response_id
+        // );
+        const refresh = updatedRequestData.filter(
           (item: RequestModel) => !item.response_id
         );
         if (refresh) {
@@ -51,6 +58,7 @@ export default function RequestEffect(): React.ReactElement {
             ).json();
           } catch (err) {
             setRequests({ data: null, error: err });
+            updatedRequestData.current = { data: null, error: err }; // ADD
             clearInterval(intervalId);
           }
 
@@ -68,6 +76,7 @@ export default function RequestEffect(): React.ReactElement {
             data: newRequestsData,
             error: null,
           });
+          updatedRequestData.current = { data: newRequestsData, error: null }; // ADD
         } else {
           clearInterval(intervalId);
         }
