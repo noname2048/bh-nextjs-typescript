@@ -4,12 +4,12 @@ module.exports = {
   images: {
     domains: ["job-book-image.s3.ap-northeast-2.amazonaws.com"],
   },
-  async rewrites() {
-    return [
-      {
-        source: "/api/books",
-        destination: `https://localhost:8000/api/v1/books`,
-      },
-    ];
-  },
+  // async rewrites() {
+  //   return [
+  //     {
+  //       source: "/api/books/:path",
+  //       destination: `https://localhost:8000/api/v1/books/:path`,
+  //     },
+  //   ];
+  // },
 };
