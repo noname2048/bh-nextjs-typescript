@@ -1,5 +1,5 @@
 import { time } from "console";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import RequestModel from "../../interfaces/requestModel";
 import ResponseModel from "../../interfaces/responseModel";
 
@@ -23,38 +23,41 @@ export default function RequestEffect(): React.ReactElement {
 
   useEffect(() => {
     (async () => {
-      if (requests?.data) {
-        const rq: RequestModel[] = requests.data;
-        const refresh = rq.filter((item: RequestModel) => !item.response_id);
-        if (refresh) {
-          const param = refresh
-            .map((item: RequestModel) => `id=${item.response_id}`)
-            .join("&");
-          try {
-            const json = await (await fetch(`/api/books/requsets`)).json();
-            requests.data.forEach((element: RequestModel) => {
-              json.forEacth((updated: RequestModel) => {
-                if (
-                  element.id === updated.id &&
-                  !element.response_id &&
-                  updated.id
-                ) {
-                  element.response_id = updated.id;
+      const intervalId: any = setInterval(async () => {
+        if (requests?.data) {
+          const rq: RequestModel[] = requests.data;
+          const refresh = rq.filter((item: RequestModel) => !item.response_id);
+          if (refresh) {
+            const param = refresh
+              .map((item: RequestModel) => `id=${item.response_id}`)
+              .join("&");
+            try {
+              const json = await (await fetch(`/api/books/requsets`)).json();
+              const newJson = requests.map((old: RequestModel) => {
+                let same = json.filter(
+                  (item: RequestModel) => old.response_id == item.response_id
+                );
+                if (same) {
+                  return same;
                 }
+                return old;
               });
-            });
-            setRequests({
-              data: requests,
-              isLoading: null,
-              error: null,
-            });
-          } catch (err) {
-            setRequests({ data: null, isLoading: null, error: err });
+
+              setRequests({
+                data: newJson,
+                isLoading: null,
+                error: null,
+              });
+            } catch (err) {
+              setRequests({ data: null, isLoading: null, error: err });
+            }
+          } else {
+            return clearInterval(intervalId);
           }
         }
-      }
+      }, 1000);
     })();
-  }, [requests]);
+  }, []);
 
   return (
     <>
