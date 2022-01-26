@@ -10,8 +10,6 @@ import ResponseModel from "../../interfaces/responseModel";
  * 4. response_id가 모두 등록될때까지 3번과정을 진행하여 업데이트한다.
  */
 export default function RequestEffect(): React.ReactElement {
-  const updatedRequestData = useRef<any>();
-
   const [requests, setRequests] = useState<any>({
     data: null,
     error: null,
@@ -24,114 +22,74 @@ export default function RequestEffect(): React.ReactElement {
           await fetch(`http://localhost:8000/api/v1/books/requests`)
         ).json();
         setRequests({ data: json, error: null });
-        updatedRequestData.current = { data: json, error: null }; // ADD
       } catch (err) {
         setRequests({ data: null, error: err });
-        updatedRequestData.current = { data: null, error: err }; // ADD
       }
     })();
 
     const intervalId: any = setInterval(async () => {
+      // 인터벌 시작지점
       console.log("interval", intervalId);
-      if (requests?.error) {
-        clearInterval(intervalId);
-      } else if (requests?.data) {
-        // const refresh = requests.data.filter(
-        //   (item: RequestModel) => !item.response_id
-        // );
-        const refresh = updatedRequestData.filter(
-          (item: RequestModel) => !item.response_id
-        );
-        if (refresh) {
-          const param = refresh
-            .map((item: RequestModel) => `id=${item.response_id}`)
-            .join("&");
-
-          let newFetchData: any;
-          try {
-            newFetchData = await (
-              await fetch(
-                `http://localhost:8000/api/v1/books/requests` + param
-                  ? `?${param}`
-                  : ""
-              )
-            ).json();
-          } catch (err) {
-            setRequests({ data: null, error: err });
-            updatedRequestData.current = { data: null, error: err }; // ADD
+      // 에전 리퀘스트 가져와서
+      setRequests(
+        async (prevRequest: {
+          data: RequestModel[] | undefined;
+          error: any;
+        }) => {
+          // 에러나있으면 종료
+          if (prevRequest?.error) {
             clearInterval(intervalId);
-          }
-
-          const newRequestsData = requests.map((oldItem: RequestModel) => {
-            let same = newFetchData.filter(
-              (item: RequestModel) => oldItem.response_id == item.response_id
+            return prevRequest;
+          } else if (prevRequest?.data) {
+            // 에러가 없다면 리프레시 확인
+            let refresh = prevRequest.data.filter(
+              (item: RequestModel) => !item.response_id
             );
-            if (same) {
-              return same;
-            }
-            return oldItem;
-          });
+            if (refresh) {
+              // 리프레시가 있다면
+              const param = refresh
+                .map((item: RequestModel) => `id=${item.response_id}`)
+                .join("&");
+              let newFetchData: any;
+              try {
+                newFetchData = await (
+                  await fetch(
+                    `http://localhost:8000/api/v1/books/requests?${param}`
+                  )
+                ).json();
+              } catch (err) {
+                // 여기서 에러 발생시 에러를 기록한다.
+                return { data: null, error: err };
+              }
+              // 예전 데이터에서 새로운 데이터를 만든다
+              const newRequestsData = prevRequest.data.map(
+                (oldItem: RequestModel) => {
+                  // 예전데이터를 돌면서 업데이트된 데이터와 매칭되면
+                  let same = newFetchData.filter(
+                    (item: RequestModel) =>
+                      oldItem.response_id == item.response_id
+                  );
+                  if (same) {
+                    return same;
+                  }
+                  return oldItem;
+                }
+              );
 
-          setRequests({
-            data: newRequestsData,
-            error: null,
-          });
-          updatedRequestData.current = { data: newRequestsData, error: null }; // ADD
-        } else {
+              return { data: newRequestsData, error: null };
+            } else {
+              clearInterval(intervalId);
+              return prevRequest;
+            }
+          }
           clearInterval(intervalId);
+          return prevRequest;
         }
-      }
+      );
     }, 1000);
 
     return () => clearInterval(intervalId);
   }, []);
-
-  // useEffect(() => {
-  //   console.log("useeffect02");
-  //   (async () => {
-  //     const intervalId: any = setInterval(async () => {
-  //       console.log("interval");
-  //       console.log(requests);
-  //       if (requests?.data) {
-  //         const rq: RequestModel[] = requests.data;
-  //         const refresh = rq.filter((item: RequestModel) => !item.response_id);
-  //         if (refresh) {
-  //           const param = refresh
-  //             .map((item: RequestModel) => `id=${item.response_id}`)
-  //             .join("&");
-  //           try {
-  //             const json = await (
-  //               await fetch(
-  //                 `http://localhost:8000/api/v1/books/requests` + param
-  //                   ? `?${param}`
-  //                   : ""
-  //               )
-  //             ).json();
-  //             const newJson = requests.map((old: RequestModel) => {
-  //               let same = json.filter(
-  //                 (item: RequestModel) => old.response_id == item.response_id
-  //               );
-  //               if (same) {
-  //                 return same;
-  //               }
-  //               return old;
-  //             });
-
-  //             setRequests({
-  //               data: newJson,
-  //               isLoading: null,
-  //               error: null,
-  //             });
-  //           } catch (err) {
-  //             setRequests({ data: null, isLoading: null, error: err });
-  //           }
-  //         } else {
-  //           return clearInterval(intervalId);
-  //         }
-  //       }
-  //     }, 1000);
-  //   })();
-  // }, []);
 
   return (
     <>
@@ -140,6 +98,8 @@ export default function RequestEffect(): React.ReactElement {
             <div key={item.id}>{item.isbn13}</div>
           ))
         : null}
+      {requests.error ? requests.error : null}
+      {JSON.stringify(requests)}
     </>
   );
 }
