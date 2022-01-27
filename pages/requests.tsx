@@ -7,6 +7,7 @@ import RequestModel from "../interfaces/requestModel";
 import ResponseModel from "../interfaces/responseModel";
 import styled from "styled-components";
 import RequestEffect from "../components/special/requestEffect";
+import RequestSWR from "../components/special/requestSWR";
 
 // const TempComp = styled.div`
 //   tr,
@@ -92,7 +93,8 @@ const RequestsPage: NextPage = () => {
   // const responseList = responseData as unknown as ResponseModel[];
 
   return (
-    <RequestEffect />
+    <RequestSWR />
+    // <RequestEffect />
     // <>
     //   <table className="w-full border-2">
     //     <thead className="border-2">
